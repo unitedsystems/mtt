@@ -1,4 +1,4 @@
-package server
+package engine
 
 type message struct {
 	timestamp int64
