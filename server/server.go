@@ -14,6 +14,7 @@ func (s *grpcServer) listen(ss pb.Chat_SubscribeServer) {
 		m, err := ss.Recv()
 		if err != nil {
 			log.Printf("error in RECV on server: %#v", err)
+			return
 		}
 		if m.Subscribe {
 			log.Printf("%s subscribed to %s", m.Username, m.Room)
@@ -31,7 +32,8 @@ func (s *grpcServer) serve(ss pb.Chat_SubscribeServer) {
 		mp.Messages[0] = &pb.IncomingMessage{Text: "some message"}
 		err := ss.Send(mp)
 		if err != nil {
-			log.Fatalf("error in SEND on server " + err.Error())
+			log.Printf("error in SEND on server " + err.Error())
+			return
 		}
 	}
 }
