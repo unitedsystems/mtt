@@ -9,11 +9,11 @@ import (
 // room refers to chat room
 type room struct {
 	sync.RWMutex
-	messages []message
+	messages []Message
 	lastID   int
 
 	clientLock        sync.RWMutex
-	clientDescriptors map[string]*clientDescriptor
+	clientDescriptors map[string]*Descriptor
 
 	broadcastChan chan struct{}
 }
@@ -27,6 +27,10 @@ func (r *room) broadcast() {
 			case d.updateChan <- struct{}{}:
 			default:
 			}
+		}
+		r.clientLock.RUnlock()
+		r.clientLock.RLock()
+		for _, d := range r.clientDescriptors {
 			select {
 			case d.c.masterNotification <- struct{}{}:
 			default:
@@ -36,10 +40,9 @@ func (r *room) broadcast() {
 	}
 }
 
-// concurrent
-func (r *room) Publish(m message) {
+func (r *room) publish(m Message) {
 	r.Lock()
-	m.timestamp = time.Now().UnixNano()
+	m.Timestamp = time.Now().UnixNano()
 	r.messages[r.lastID%historySize] = m
 	r.lastID++
 	r.Unlock()
@@ -50,8 +53,8 @@ func (r *room) Publish(m message) {
 	}
 }
 
-func (r *room) Subscribe(name string, c *client) (*clientDescriptor, error) {
-	d := &clientDescriptor{
+func (r *room) subscribe(name string, c *Client) (*Descriptor, error) {
+	d := &Descriptor{
 		c:          c,
 		r:          r,
 		name:       name,
@@ -64,19 +67,14 @@ func (r *room) Subscribe(name string, c *client) (*clientDescriptor, error) {
 	}
 	c.descriptors = append(c.descriptors, d)
 	r.clientDescriptors[name] = d
-	return d, nil
-}
 
-func (r *room) Unsubscribe(cd *clientDescriptor) {
-	r.clientLock.Lock()
-	defer r.clientLock.Unlock()
-	delete(r.clientDescriptors, cd.name)
+	return d, nil
 }
 
 func newRoom(name string) *room {
 	r := &room{
-		messages:          make([]message, historySize),
-		clientDescriptors: make(map[string]*clientDescriptor, historySize),
+		messages:          make([]Message, historySize),
+		clientDescriptors: make(map[string]*Descriptor, historySize),
 		broadcastChan:     make(chan struct{}, 1),
 		clientLock:        sync.RWMutex{},
 	}

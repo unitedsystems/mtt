@@ -3,7 +3,7 @@ package engine
 import "testing"
 
 func Test__RoomSpawning(t *testing.T) {
-	s := newServer()
+	s := NewServer()
 	roomName := "foo"
 
 	firstCall := s.getRoom(roomName)

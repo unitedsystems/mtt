@@ -7,18 +7,18 @@ import (
 )
 
 func Test__DescriptorPull(t *testing.T) {
-	s := newServer()
+	s := NewServer()
 	roomName := "foo"
 	userName := "John"
 	r := s.getRoom(roomName)
-	d, _ := r.Subscribe(userName, newClient())
+	d, _ := r.subscribe(userName, newClient(s))
 
 	numberOfMessages := historySize * 3 / 2
 	for i := 0; i < numberOfMessages; i++ {
 		m := fmt.Sprintf("message%d", i)
-		r.Publish(message{
-			name: userName,
-			text: m,
+		r.publish(Message{
+			Name: userName,
+			Text: m,
 		})
 	}
 

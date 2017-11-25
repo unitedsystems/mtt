@@ -1,8 +1,9 @@
 package engine
 
-type message struct {
-	timestamp int64
-	room      string
-	name      string
-	text      string
+// Message represents chat message
+type Message struct {
+	Timestamp int64
+	Room      string
+	Name      string
+	Text      string
 }

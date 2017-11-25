@@ -42,7 +42,7 @@ func spawnClient(addr, rooms string) {
 	}
 
 	for {
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * 10)
 		err = subscription.Send(&pb.OutgoingMessage{
 			Room:     fmt.Sprintf("room%d", rand.Int()%3),
 			Text:     time.Now().String(),

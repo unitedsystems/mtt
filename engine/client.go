@@ -4,22 +4,26 @@ import (
 	"time"
 )
 
-type client struct {
+// Client is representation of client in chat engine
+type Client struct {
+	server             *Server
 	masterNotification chan struct{}
-	descriptors        []*clientDescriptor
-	connection         struct{}
+	descriptors        []*Descriptor
 }
 
-func (c *client) backgroundPoll() {
-	for {
-		<-c.masterNotification
-		c.flush(c.poll())
+func newClient(s *Server) *Client {
+	return &Client{
+		server:             s,
+		masterNotification: make(chan struct{}, 1),
+		descriptors:        make([]*Descriptor, 0),
 	}
 }
 
-func (c *client) poll() []message {
+// Poll queries all underlying descriptors
+// and gets returns unsorted pack of new messages
+func (c *Client) Poll() []Message {
 	t := time.Now().UnixNano()
-	result := make([]message, 0)
+	result := make([]Message, 0)
 	for _, cd := range c.descriptors {
 		select {
 		case <-cd.updateChan:
@@ -30,13 +34,22 @@ func (c *client) poll() []message {
 	return result
 }
 
-func (c *client) flush(messages []message) {
-	// write to socket here
+// Disconnect cleans up connections
+func (c *Client) Disconnect() {
 }
 
-func newClient() *client {
-	return &client{
-		masterNotification: make(chan struct{}, 1),
-		descriptors:        make([]*clientDescriptor, 0),
-	}
+// Subscribe binds connection with a room
+func (c *Client) Subscribe(room, username string) error {
+	r := c.server.getRoom(room)
+	_, err := r.subscribe(username, c)
+	return err
+}
+
+// Publish sends message to specified room
+func (c *Client) Publish(room, text string) error {
+	r := c.server.getRoom(room)
+	r.publish(Message{
+		Text: text,
+	})
+	return nil
 }
