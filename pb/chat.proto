@@ -1,0 +1,26 @@
+syntax = "proto3";
+package pb;
+
+service Chat {
+   rpc Subscribe(stream OutgoingMessage) returns (stream MessagePack) {};
+}
+
+message MessagePack {
+  repeated IncomingMessage messages = 1;
+}
+
+message OutgoingMessage {
+  string room = 1;
+
+  bool subscribe = 2;
+
+  string username = 3;
+  string text = 4;
+}
+
+message IncomingMessage {
+  string room = 1;
+  string username = 2;
+  int64 timestamp = 3;
+  string text = 4;
+}
