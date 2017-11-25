@@ -10,8 +10,8 @@ func Test__ClientPoll(t *testing.T) {
 	r2 := s.getRoom("room2")
 
 	c := newClient(s)
-	r1.subscribe("john", c)
-	r2.subscribe("jack", c)
+	c.Subscribe("room1", "john")
+	c.Subscribe("room2", "jack")
 
 	r1.publish(Message{
 		Text: "test1",

@@ -21,17 +21,32 @@ func spawnClient(addr, rooms string) {
 	defer conn.Close()
 
 	c := pb.NewChatClient(conn)
-
-	// stub for requests
-	numberOfRooms := 3
-	username := fmt.Sprintf("Kenny-%d", rand.Int())
-
 	subscription, err := c.Subscribe(context.Background())
 	if err != nil {
 		log.Fatalf("could not subscribe: %v", err)
 	}
+
+	subscribe(subscription)
+	go publisher(subscription)
+	receiver(subscription)
+}
+
+func receiver(c pb.Chat_SubscribeClient) {
+	for {
+		mp, err := c.Recv()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(mp)
+	}
+
+}
+
+func subscribe(c pb.Chat_SubscribeClient) {
+	numberOfRooms := 3
+	username := fmt.Sprintf("Kenny-%d", rand.Int())
 	for i := 1; i <= numberOfRooms; i++ {
-		err = subscription.Send(&pb.OutgoingMessage{
+		err := c.Send(&pb.OutgoingMessage{
 			Room:      fmt.Sprintf("room%d", i),
 			Subscribe: true,
 			Username:  username,
@@ -40,22 +55,19 @@ func spawnClient(addr, rooms string) {
 			panic(err)
 		}
 	}
+}
 
+func publisher(c pb.Chat_SubscribeClient) {
 	for {
-		time.Sleep(time.Second * 10)
-		err = subscription.Send(&pb.OutgoingMessage{
-			Room:     fmt.Sprintf("room%d", rand.Int()%3),
-			Text:     time.Now().String(),
-			Username: username,
+		time.Sleep(time.Second * 3)
+		fmt.Println("sending")
+		err := c.Send(&pb.OutgoingMessage{
+			Room: fmt.Sprintf("room%d", rand.Int()%3),
+			Text: time.Now().String(),
 		})
 		if err != nil {
 			panic(err)
 		}
-		mp, err := subscription.Recv()
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(mp)
 	}
 }
 

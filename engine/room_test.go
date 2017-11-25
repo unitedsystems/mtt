@@ -54,6 +54,7 @@ func Test__RoomSubscription(t *testing.T) {
 	if err != nil {
 		t.Errorf("got error on room subscription: %v", err)
 	}
+	fmt.Println()
 
 	_, err = r.subscribe(userName, newClient(s))
 	if err == nil {
@@ -67,7 +68,8 @@ func Test__RoomBroadcast(t *testing.T) {
 	userName := "John"
 	messageText := "Hallo!"
 	r := s.getRoom(roomName)
-	d, _ := r.subscribe(userName, newClient(s))
+	c := newClient(s)
+	r.subscribe(userName, c)
 
 	r.publish(Message{
 		Name: userName,
@@ -75,7 +77,7 @@ func Test__RoomBroadcast(t *testing.T) {
 	})
 
 	select {
-	case <-d.updateChan:
+	case <-c.masterNotification:
 	case <-time.NewTimer(time.Millisecond).C:
 		t.Errorf("room does not update descriptors")
 	}
