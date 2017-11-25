@@ -79,6 +79,6 @@ func Test__RoomBroadcast(t *testing.T) {
 	select {
 	case <-c.masterNotification:
 	case <-time.NewTimer(time.Millisecond).C:
-		t.Errorf("room does not update descriptors")
+		t.Errorf("room does not update links")
 	}
 }

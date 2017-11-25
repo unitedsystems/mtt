@@ -41,7 +41,7 @@ type MessagePack struct {
 func (m *MessagePack) Reset()                    { *m = MessagePack{} }
 func (m *MessagePack) String() string            { return proto.CompactTextString(m) }
 func (*MessagePack) ProtoMessage()               {}
-func (*MessagePack) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (*MessagePack) Link() ([]byte, []int) { return fileLink0, []int{0} }
 
 func (m *MessagePack) GetMessages() []*IncomingMessage {
 	if m != nil {
@@ -60,7 +60,7 @@ type OutgoingMessage struct {
 func (m *OutgoingMessage) Reset()                    { *m = OutgoingMessage{} }
 func (m *OutgoingMessage) String() string            { return proto.CompactTextString(m) }
 func (*OutgoingMessage) ProtoMessage()               {}
-func (*OutgoingMessage) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*OutgoingMessage) Link() ([]byte, []int) { return fileLink0, []int{1} }
 
 func (m *OutgoingMessage) GetRoom() string {
 	if m != nil {
@@ -100,7 +100,7 @@ type IncomingMessage struct {
 func (m *IncomingMessage) Reset()                    { *m = IncomingMessage{} }
 func (m *IncomingMessage) String() string            { return proto.CompactTextString(m) }
 func (*IncomingMessage) ProtoMessage()               {}
-func (*IncomingMessage) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*IncomingMessage) Link() ([]byte, []int) { return fileLink0, []int{2} }
 
 func (m *IncomingMessage) GetRoom() string {
 	if m != nil {
@@ -240,10 +240,10 @@ var _Chat_serviceDesc = grpc.ServiceDesc{
 	Metadata: "pb/chat.proto",
 }
 
-func init() { proto.RegisterFile("pb/chat.proto", fileDescriptor0) }
+func init() { proto.RegisterFile("pb/chat.proto", fileLink0) }
 
-var fileDescriptor0 = []byte{
-	// 237 bytes of a gzipped FileDescriptorProto
+var fileLink0 = []byte{
+	// 237 bytes of a gzipped FileLinkProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x90, 0x31, 0x6b, 0xc3, 0x30,
 	0x10, 0x85, 0x2b, 0xdb, 0x14, 0xfb, 0x42, 0x09, 0xa8, 0x8b, 0x08, 0x19, 0x8c, 0x27, 0x4f, 0x4e,
 	0x49, 0x87, 0x6e, 0xed, 0xd0, 0xa9, 0x43, 0x69, 0x71, 0x7f, 0x81, 0x64, 0x84, 0x63, 0x8a, 0x2c,

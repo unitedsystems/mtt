@@ -11,18 +11,18 @@ type Client struct {
 	sync.RWMutex
 	server             *Server
 	masterNotification chan struct{}
-	descriptors        map[string]*Descriptor // NOTE: key is room name, thus we are sure that username is unique for this room
+	links              map[string]*Link // NOTE: key is room name, thus we are sure that username is unique for this room
 }
 
 func newClient(s *Server) *Client {
 	return &Client{
 		server:             s,
 		masterNotification: make(chan struct{}, 1),
-		descriptors:        make(map[string]*Descriptor),
+		links:              make(map[string]*Link),
 	}
 }
 
-// Poll queries all underlying descriptors
+// Poll queries all underlying links
 // and gets returns unsorted pack of new messages
 func (c *Client) Poll() []Message {
 	<-c.masterNotification
@@ -30,7 +30,7 @@ func (c *Client) Poll() []Message {
 	defer c.Unlock()
 	t := time.Now().UnixNano()
 	result := make([]Message, 0)
-	for _, cd := range c.descriptors {
+	for _, cd := range c.links {
 		messages := cd.pull(t)
 		result = append(result, messages...)
 	}
@@ -41,10 +41,10 @@ func (c *Client) Poll() []Message {
 func (c *Client) Disconnect() {
 	c.Lock()
 	defer c.Unlock()
-	oldDescriptors := c.descriptors
-	c.descriptors = nil
-	for _, d := range oldDescriptors {
-		delete(d.r.descriptors, d.name)
+	oldLinks := c.links
+	c.links = nil
+	for _, d := range oldLinks {
+		delete(d.r.links, d.name)
 	}
 }
 
@@ -56,7 +56,7 @@ func (c *Client) Subscribe(room, username string) error {
 		panic(err)
 	}
 	c.Lock()
-	c.descriptors[r.name] = d
+	c.links[r.name] = d
 	c.Unlock()
 	// let's read history
 	select {
@@ -68,7 +68,7 @@ func (c *Client) Subscribe(room, username string) error {
 
 // Publish sends message to specified room
 func (c *Client) Publish(room, text string) error {
-	if _, ok := c.descriptors[room]; !ok {
+	if _, ok := c.links[room]; !ok {
 		return fmt.Errorf("can't send message to %s (not subscribed)", room)
 	}
 	r := c.server.getRoom(room)

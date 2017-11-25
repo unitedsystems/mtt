@@ -12,8 +12,8 @@ type room struct {
 	lastID   int
 	name     string
 
-	clientLock  sync.RWMutex
-	descriptors map[string]*Descriptor // NOTE: key is user's name for this particular room
+	clientLock sync.RWMutex
+	links      map[string]*Link // NOTE: key is user's name for this particular room
 
 	broadcastChan chan struct{}
 }
@@ -22,7 +22,7 @@ func newRoom(name string) *room {
 	r := &room{
 		name:          name,
 		messages:      make([]Message, historySize),
-		descriptors:   make(map[string]*Descriptor, historySize),
+		links:         make(map[string]*Link, historySize),
 		broadcastChan: make(chan struct{}, 1),
 		clientLock:    sync.RWMutex{},
 	}
@@ -34,7 +34,7 @@ func (r *room) askClientsToPoll() {
 	for {
 		<-r.broadcastChan
 		r.clientLock.RLock()
-		for _, d := range r.descriptors {
+		for _, d := range r.links {
 			select {
 			case d.c.masterNotification <- struct{}{}:
 			default:
@@ -57,14 +57,14 @@ func (r *room) publish(m Message) {
 	}
 }
 
-func (r *room) subscribe(name string, c *Client) (*Descriptor, error) {
-	d := &Descriptor{c: c, r: r}
+func (r *room) subscribe(name string, c *Client) (*Link, error) {
+	d := &Link{c: c, r: r}
 	r.clientLock.Lock()
-	if _, ok := r.descriptors[name]; ok {
+	if _, ok := r.links[name]; ok {
 		r.clientLock.Unlock()
 		return nil, fmt.Errorf("%s is not unique", name)
 	}
-	r.descriptors[name] = d
+	r.links[name] = d
 	r.clientLock.Unlock()
 	return d, nil
 }

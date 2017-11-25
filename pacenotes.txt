@@ -1,0 +1,4 @@
+pkg: mtt/engine
+Benchmark__SingleChatManyClients-4   	  300000	      4139 ns/op	     994 B/op	       8 allocs/op
+Benchmark__SingleClientManyRooms-4   	  200000	      6420 ns/op	    2088 B/op	      41 allocs/op
+Benchmark__ManyToMany-4              	   50000	     32294 ns/op	   21197 B/op	     107 allocs/op

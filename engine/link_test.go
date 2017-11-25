@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func Test__DescriptorPull(t *testing.T) {
+func Test__LinkPull(t *testing.T) {
 	s := NewServer()
 	roomName := "foo"
 	userName := "John"
@@ -25,6 +25,6 @@ func Test__DescriptorPull(t *testing.T) {
 	data := d.pull(time.Now().UnixNano())
 
 	if len(data) != historySize {
-		t.Errorf("descriptor fails to pull data expected %d (actual %d)", historySize, len(data))
+		t.Errorf("failed to pull data from link, expected %d (actual %d)", historySize, len(data))
 	}
 }
