@@ -2,7 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"log"
 	"sync"
 	"time"
 )
@@ -67,6 +66,5 @@ func (r *room) subscribe(name string, c *Client) (*Descriptor, error) {
 	}
 	r.descriptors[name] = d
 	r.clientLock.Unlock()
-	log.Printf("subscription room:%#v client:%#v", r.descriptors, c.descriptors)
 	return d, nil
 }
