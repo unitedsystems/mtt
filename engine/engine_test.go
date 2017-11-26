@@ -3,9 +3,31 @@ package engine
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
-func Benchmark__SingleChatManyClients(b *testing.B) {
+func Benchmark__SingleChatSingleClient(b *testing.B) {
+	s := NewServer()
+	roomName := "foo"
+	userName := "John"
+	r := s.getRoom(roomName)
+
+	c := newClient(s)
+	c.Subscribe(roomName, userName)
+	go func() {
+		for {
+			c.Poll()
+		}
+	}()
+
+	time.Sleep(time.Millisecond)
+	b.ResetTimer()
+	for k := 0; k < b.N; k++ {
+		r.publish("test", nil)
+	}
+}
+
+func Benchmark__SingleChatManyClientsPoll(b *testing.B) {
 	s := NewServer()
 	roomName := "foo"
 	userName := "John"
@@ -21,10 +43,11 @@ func Benchmark__SingleChatManyClients(b *testing.B) {
 			}
 		}()
 	}
+
+	time.Sleep(time.Millisecond)
+	b.ResetTimer()
 	for k := 0; k < b.N; k++ {
-		r.publish(Message{
-			Text: fmt.Sprintf("test%d", k),
-		})
+		r.publish("test", nil)
 	}
 }
 
@@ -47,11 +70,11 @@ func Benchmark__SingleClientManyRooms(b *testing.B) {
 		c.Subscribe(name, userName)
 	}
 
+	time.Sleep(time.Millisecond)
+	b.ResetTimer()
 	for k := 0; k < b.N; k++ {
 		for j := 0; j < numberOfRooms; j++ {
-			rooms[j].publish(Message{
-				Text: fmt.Sprintf("test-%d-%d", j, k),
-			})
+			rooms[j].publish("test", nil)
 		}
 	}
 }
@@ -83,11 +106,11 @@ func Benchmark__ManyToMany(b *testing.B) {
 		}
 	}
 
+	time.Sleep(time.Millisecond)
+	b.ResetTimer()
 	for k := 0; k < b.N; k++ {
 		for j := 0; j < numberOfRooms; j++ {
-			rooms[j].publish(Message{
-				Text: fmt.Sprintf("test-%d-%d", j, k),
-			})
+			rooms[j].publish("test", nil)
 		}
 	}
 }

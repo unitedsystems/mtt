@@ -29,9 +29,9 @@ func (c *Client) Poll() []Message {
 	c.Lock()
 	defer c.Unlock()
 	t := time.Now().UnixNano()
-	result := make([]Message, 0)
-	for _, cd := range c.links {
-		messages := cd.pull(t)
+	result := make([]Message, 0, historySize)
+	for _, l := range c.links {
+		messages := l.pull(t)
 		result = append(result, messages...)
 	}
 	return result
@@ -72,8 +72,6 @@ func (c *Client) Publish(room, text string) error {
 		return fmt.Errorf("can't send message to %s (not subscribed)", room)
 	}
 	r := c.server.getRoom(room)
-	r.publish(Message{
-		Text: text,
-	})
+	r.publish(text, c.links[room])
 	return nil
 }

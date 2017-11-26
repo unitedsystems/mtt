@@ -1,5 +1,6 @@
 package engine
 
 const (
-	historySize = 128
+	historySize    = 128
+	maxMessageSize = 254
 )

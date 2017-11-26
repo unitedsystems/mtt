@@ -15,11 +15,7 @@ func Test__LinkPull(t *testing.T) {
 
 	numberOfMessages := historySize * 3 / 2
 	for i := 0; i < numberOfMessages; i++ {
-		m := fmt.Sprintf("message%d", i)
-		r.publish(Message{
-			Name: userName,
-			Text: m,
-		})
+		r.publish(fmt.Sprintf("message%d", i), nil)
 	}
 
 	data := d.pull(time.Now().UnixNano())

@@ -1,5 +1,6 @@
 protoc ./pb/chat.proto --go_out=plugins=grpc:.
 go build  -o chat *.go
+go test -bench=. -benchmem -cpuprofile=cpu.out -memprofile=mem.out
 
 
 // Чат  Создать прототип системы, котороя позволит общаться нескольким людям через специальные CLI [1] приложения.

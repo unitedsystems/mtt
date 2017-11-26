@@ -8,23 +8,25 @@ import (
 
 type room struct {
 	sync.RWMutex
-	messages []Message
-	lastID   int
+	messages []roomMessage
+	lastID   uint64 // TODO: process overflow
 	name     string
 
-	clientLock sync.RWMutex
-	links      map[string]*Link // NOTE: key is user's name for this particular room
+	linksLock sync.RWMutex
+	links     map[string]*Link // NOTE: key is user's name for this particular room
 
-	broadcastChan chan struct{}
+	broadcast bool
 }
 
 func newRoom(name string) *room {
 	r := &room{
-		name:          name,
-		messages:      make([]Message, historySize),
-		links:         make(map[string]*Link, historySize),
-		broadcastChan: make(chan struct{}, 1),
-		clientLock:    sync.RWMutex{},
+		name:      name,
+		messages:  make([]roomMessage, historySize),
+		links:     make(map[string]*Link, historySize),
+		linksLock: sync.RWMutex{},
+	}
+	for i := range r.messages {
+		r.messages[i].allocateBuffer()
 	}
 	go r.askClientsToPoll()
 	return r
@@ -32,39 +34,44 @@ func newRoom(name string) *room {
 
 func (r *room) askClientsToPoll() {
 	for {
-		<-r.broadcastChan
-		r.clientLock.RLock()
-		for _, d := range r.links {
+		if r.broadcast {
+			r.Lock()
+			r.broadcast = false
+			r.Unlock()
+		} else {
+			time.Sleep(time.Millisecond)
+			continue
+		}
+
+		r.linksLock.RLock()
+		for _, l := range r.links {
 			select {
-			case d.c.masterNotification <- struct{}{}:
+			case l.c.masterNotification <- struct{}{}:
 			default:
 			}
 		}
-		r.clientLock.RUnlock()
+		r.linksLock.RUnlock()
 	}
 }
 
-func (r *room) publish(m Message) {
+func (r *room) publish(text string, link *Link) {
 	r.Lock()
-	m.Timestamp = time.Now().UnixNano()
-	r.messages[r.lastID%historySize] = m
+	defer r.Unlock()
+	idx := r.lastID % historySize
+	r.messages[idx].write(text)
+	r.messages[idx].Link = link
 	r.lastID++
-	r.Unlock()
-
-	select {
-	case r.broadcastChan <- struct{}{}: // shedules broadcast
-	default:
-	}
+	r.broadcast = true
 }
 
 func (r *room) subscribe(name string, c *Client) (*Link, error) {
-	d := &Link{c: c, r: r}
-	r.clientLock.Lock()
+	l := &Link{c: c, r: r}
+	r.linksLock.Lock()
 	if _, ok := r.links[name]; ok {
-		r.clientLock.Unlock()
+		r.linksLock.Unlock()
 		return nil, fmt.Errorf("%s is not unique", name)
 	}
-	r.links[name] = d
-	r.clientLock.Unlock()
-	return d, nil
+	r.links[name] = l
+	r.linksLock.Unlock()
+	return l, nil
 }

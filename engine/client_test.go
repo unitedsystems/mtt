@@ -13,15 +13,9 @@ func Test__ClientPoll(t *testing.T) {
 	c.Subscribe("room1", "john")
 	c.Subscribe("room2", "jack")
 
-	r1.publish(Message{
-		Text: "test1",
-	})
-	r2.publish(Message{
-		Text: "test2",
-	})
-	r2.publish(Message{
-		Text: "test3",
-	})
+	r1.publish("test1", nil)
+	r2.publish("test2", nil)
+	r2.publish("test3", nil)
 
 	<-c.masterNotification
 	actualResult := c.Poll()
