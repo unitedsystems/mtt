@@ -34,11 +34,12 @@ func newRoom(name string) *room {
 
 func (r *room) askClientsToPoll() {
 	for {
+		r.Lock()
 		if r.broadcast {
-			r.Lock()
 			r.broadcast = false
 			r.Unlock()
 		} else {
+			r.Unlock()
 			time.Sleep(time.Millisecond)
 			continue
 		}

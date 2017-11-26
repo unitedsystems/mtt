@@ -1,3 +1,4 @@
 chat
 *.out
 *.png
+/vendor

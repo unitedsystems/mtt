@@ -49,8 +49,6 @@ func Test__RoomSubscription(t *testing.T) {
 	if err != nil {
 		t.Errorf("got error on room subscription: %v", err)
 	}
-	fmt.Println()
-
 	_, err = r.subscribe(userName, newClient(s))
 	if err == nil {
 		t.Errorf("didn't get error on second room subscription")

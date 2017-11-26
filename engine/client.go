@@ -45,7 +45,6 @@ func (c *Client) Disconnect() {
 	c.links = nil
 	for _, l := range oldLinks {
 		l.r.linksLock.Lock()
-		fmt.Println("disconnect", l.name)
 		delete(l.r.links, l.name)
 		l.r.linksLock.Unlock()
 	}

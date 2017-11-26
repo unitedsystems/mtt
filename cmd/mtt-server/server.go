@@ -2,9 +2,10 @@ package main
 
 import (
 	"log"
-	"mtt/engine"
-	"mtt/pb"
 	"time"
+
+	"github.com/unitedsystems/mtt/engine"
+	"github.com/unitedsystems/mtt/pb"
 )
 
 type grpcServer struct {

@@ -8,13 +8,6 @@ type roomMessage struct {
 	Buffer    []byte
 }
 
-func newMessage(text string) roomMessage {
-	m := new(roomMessage)
-	m.allocateBuffer()
-	m.write(text)
-	return *m
-}
-
 func (m *roomMessage) allocateBuffer() {
 	m.Buffer = make([]byte, 0, maxMessageSize)
 }
@@ -38,7 +31,7 @@ func (m *roomMessage) export() Message {
 	return result
 }
 
-// Message is interface for outgoing chat message
+// Message is available to chat engine users
 type Message struct {
 	Timestamp int64
 	Username  string

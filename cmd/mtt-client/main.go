@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"mtt/pb"
+	"github.com/unitedsystems/mtt/pb"
 
 	"google.golang.org/grpc"
 )
