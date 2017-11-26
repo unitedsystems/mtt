@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -70,9 +72,20 @@ func subscribe(c pb.Chat_SubscribeClient, rooms string) {
 }
 
 func publisher(c pb.Chat_SubscribeClient) {
-	var room, message string
+	var room, message, line string
+	scanner := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Scanf("%s %s", &room, &message)
+		if scanner.Scan() {
+			line = scanner.Text()
+		}
+		parts := strings.Split(line, " ")
+		if len(parts) < 2 {
+			fmt.Println("wrong message format, should be: room your message here")
+
+			continue
+		}
+		room = parts[0]
+		message = strings.Join(parts[1:len(parts)], " ")
 		err := c.Send(&pb.OutgoingMessage{
 			Room: room,
 			Text: message,
