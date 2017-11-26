@@ -65,13 +65,12 @@ func (r *room) publish(text string, link *Link) {
 }
 
 func (r *room) subscribe(name string, c *Client) (*Link, error) {
-	l := &Link{c: c, r: r}
+	l := &Link{c: c, r: r, name: name}
 	r.linksLock.Lock()
+	defer r.linksLock.Unlock()
 	if _, ok := r.links[name]; ok {
-		r.linksLock.Unlock()
-		return nil, fmt.Errorf("%s is not unique", name)
+		return nil, fmt.Errorf("%s is not unique for room %s", name, r.name)
 	}
 	r.links[name] = l
-	r.linksLock.Unlock()
 	return l, nil
 }

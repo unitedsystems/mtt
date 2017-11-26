@@ -21,8 +21,8 @@ func (s *grpcServer) sendError(ss pb.Chat_SubscribeServer, errorToSend error) {
 	messagePack := new(pb.MessagePack)
 	messagePack.Messages = make([]*pb.IncomingMessage, 1)
 	messagePack.Messages[0] = &pb.IncomingMessage{
-		Room:      "system",
-		Username:  "@chatbot",
+		Room:      "SYSTEM",
+		Username:  "chatbot",
 		Timestamp: time.Now().Unix(),
 		Text:      errorToSend.Error(),
 	}
@@ -82,9 +82,9 @@ func (s *grpcServer) serve(ss pb.Chat_SubscribeServer, client *engine.Client) {
 		for i, message := range messages {
 			messagePack.Messages[i] = &pb.IncomingMessage{
 				Room:      message.Room,
-				Username:  message.Name,
+				Username:  message.Username,
 				Timestamp: message.Timestamp,
-				Text:      message.Text,
+				Text:      string(message.Text),
 			}
 		}
 		log.Println("Polled and sending", len(messages), "messages")

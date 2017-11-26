@@ -43,8 +43,11 @@ func (c *Client) Disconnect() {
 	defer c.Unlock()
 	oldLinks := c.links
 	c.links = nil
-	for _, d := range oldLinks {
-		delete(d.r.links, d.name)
+	for _, l := range oldLinks {
+		l.r.linksLock.Lock()
+		fmt.Println("disconnect", l.name)
+		delete(l.r.links, l.name)
+		l.r.linksLock.Unlock()
 	}
 }
 
@@ -53,7 +56,7 @@ func (c *Client) Subscribe(room, username string) error {
 	r := c.server.getRoom(room)
 	d, err := r.subscribe(username, c)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	c.Lock()
 	c.links[r.name] = d
@@ -68,6 +71,9 @@ func (c *Client) Subscribe(room, username string) error {
 
 // Publish sends message to specified room
 func (c *Client) Publish(room, text string) error {
+	if len([]byte(text)) > maxMessageSize {
+		return fmt.Errorf("message is too long")
+	}
 	if _, ok := c.links[room]; !ok {
 		return fmt.Errorf("can't send message to %s (not subscribed)", room)
 	}

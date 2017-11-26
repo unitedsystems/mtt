@@ -36,10 +36,10 @@ func (l *Link) pull(maxTimestamp int64) []Message {
 	for i := uint64(0); i < span; i++ {
 		idx := (room.lastID - span + i) % historySize
 		if room.messages[idx].Timestamp > maxTimestamp {
-			break
+			return result
 		}
 		result = append(result, room.messages[idx].export())
-		l.lastID = room.lastID - span + i
+		l.lastID = room.lastID - span + i + 1
 	}
 	return result
 }
