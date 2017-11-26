@@ -46,10 +46,7 @@ func (r *room) askClientsToPoll() {
 
 		r.linksLock.RLock()
 		for _, l := range r.links {
-			select {
-			case l.c.masterNotification <- struct{}{}:
-			default:
-			}
+			l.updateAvailable()
 		}
 		r.linksLock.RUnlock()
 	}

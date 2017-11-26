@@ -1,12 +1,7 @@
 package engine
 
-import (
-	"sync"
-)
-
 // Link is a link between chat room and client
 type Link struct {
-	sync.Mutex
 	r      *room
 	c      *Client
 	lastID uint64
@@ -42,4 +37,11 @@ func (l *Link) pull(maxTimestamp int64) []Message {
 		l.lastID = room.lastID - span + i + 1
 	}
 	return result
+}
+
+func (l *Link) updateAvailable() {
+	select {
+	case l.c.masterNotification <- struct{}{}:
+	default:
+	}
 }
