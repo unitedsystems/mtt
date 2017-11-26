@@ -1,4 +1,4 @@
 chat
 *.out
-*.png
 /vendor
+*.test
